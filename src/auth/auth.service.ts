@@ -1,31 +1,35 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { User } from 'src/dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { AuthDtO, AuthSignInDtO } from './dto';
+import * as argon from 'argon2';
 
 @Injectable()
 export class AuthService {
   private users: User[] = [];
 
-  login(user: User) {
-    const foundUser = this.users.find(
-      (usr) => usr.email == user.email && usr.password == user.password,
-    );
-    console.log(foundUser);
-    if (foundUser) {
-      return {
-        message: 'Login successful',
-        user,
-      };
-    }
-    return { message: 'User does not exist' };
-  }
+  constructor(private readonly prisma: PrismaService) {}
 
-  signup(user: User) {
-    const userIndex = this.users.findIndex((usr) => usr.email == user.email);
+  async login(dto: AuthSignInDtO) {
+    const user = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
 
-    if (userIndex == -1) {
-      this.users.push(user);
+    if (user && (await argon.verify(user.passwordHash, dto.password))) {
       return user;
     }
-    return { message: 'User already exists' };
+    throw new ForbiddenException('User email/password is incorrect');
+  }
+
+  async signup(dto: AuthDtO) {
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        passwordHash: await argon.hash(dto.password),
+        firstName: dto.firstName,
+        lastName: dto.lastName,
+      },
+    });
+    return user;
   }
 }
