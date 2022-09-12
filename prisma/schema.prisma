@@ -18,7 +18,22 @@ model User {
   lastName     String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  Todo         Todo[]
+  todos        Todo[]
+  token        RefreshToken?
+
+  @@map("user")
+}
+
+model RefreshToken {
+  id Int @id @default(autoincrement())
+  hashedToken String 
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  userId Int @unique
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("refresh_token")
+
 }
 
 model Todo {
@@ -29,5 +44,6 @@ model Todo {
 
   userId Int
   user   User @relation(fields: [userId], references: [id])
-}
 
+  @@map("todo")
+}
