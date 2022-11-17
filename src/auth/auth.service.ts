@@ -18,7 +18,7 @@ export class AuthService {
 
     if (user && (await argon.verify(user.passwordHash, dto.password))) {
       return {
-        message: 'Account successfully created',
+        message: 'Login successfully',
         user: {
           email: user.email,
           firstName: user.firstName,

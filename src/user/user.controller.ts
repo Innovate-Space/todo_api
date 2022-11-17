@@ -1,5 +1,5 @@
 import { Controller, Put, UseGuards } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+//import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AccessJwtAuthGuard } from 'src/auth/decorator/access.decorator';
 
